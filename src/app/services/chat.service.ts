@@ -14,19 +14,20 @@ export class ChatService {
     this.socket = io('http://localhost:3000', {transports: ['websocket', 'polling', 'flashsocket']});
   }
 
-  joinRoom(data: any): void {
-    this.socket.emit('join', data);
-  }
-
+   /**
+   * @author: Gurnain
+   * Sends object which contains message and other information of the sender and receiver
+   **/
   sendMessage(data: any): void {
     this.socket.emit('message', data);
   }
-
+ /**
+   * @author: Gurnain
+   * Gets message array which contains previous messages when app opens
+   **/
   getMessage(): Observable<any> {
     return new Observable<any>(observer => {
-      this.socket.on('new message', (data) => {
-        console.log("sdfsfsfsf", data);
-        
+      this.socket.on('new message', (data) => {        
         observer.next(data);
       });
 
@@ -36,32 +37,34 @@ export class ChatService {
     });
   }
 
+ /**
+   * @author: Gurnain
+   * Sends id of the user when logged in
+   **/
   login(data: number):void{
     this.socket.emit('new-user-add', data);
   }
 
+ /**
+   * @author: Gurnain
+   * Sends id of the user when logged out in
+   **/
   logout(data: number): void{
     this.socket.emit('offline', data);
   }
 
+   /**
+   * @author: Gurnain
+   * Gets all the users logged in
+   **/
   getLoginUsers(): Observable<number>{
     return new Observable<number>(observer =>{
       this.socket.on('get-users', (data: any)=>{
-        console.log("fff", data);
         observer.next(data)
       });
       return () => {
         this.socket.disconnect();
       }
     })
-  }
-
-  userStatus(): Observable<{ user: string, status: 'online' | 'offline' }> {
-    return new Observable<{ user: string, status: 'online' | 'offline' }>(observer => {
-      this.socket.on('user joined', (data: any) => {
-        console.log('User joined:', data);
-        // Handle the event data here
-      });
-    });
   }
 }

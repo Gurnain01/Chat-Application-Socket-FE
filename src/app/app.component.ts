@@ -63,11 +63,12 @@ export class AppComponent implements OnInit, AfterViewInit {
     private chatService: ChatService
   ) {
   }
-
+ /**
+   * @author: Gurnain
+   * Get users and sets online status according to the data coming from socket
+   **/
   ngOnInit(): void {
-    console.log("hi", this.messageArray);
       this.chatService.getLoginUsers().subscribe((data: any) => {
-        console.log("ggg", data);
         this.userList.forEach((element: any) => {
           const userData = data.find((user: any) => user.userId === element.id);
           element.online = userData ? userData.online : false;
@@ -75,11 +76,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.chatService.getMessage()
         .subscribe((data: any) => {
           this.messageArray = data;
-          console.log("gg", this.messageArray);
-          
-        });
-        console.log("usersss", this.userList);
-        
+        });        
       });
 
 
@@ -89,23 +86,33 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.openPopup(this.popup);
   }
 
+   /**
+   * @author: Gurnain
+   * Opens popup for logging in through number
+   **/
   openPopup(content: any): void {
     this.modalService.open(content, {backdrop: 'static', centered: true});
   }
 
+   /**
+   * @author: Gurnain
+   * Sets current user who is logged in, sets user list to display and sends id to socket to set the user online
+   **/
   login(dismiss: any): void {
     this.currentUser = this.userList.find((user : any) => user.phone === this.phone.toString());
     this.chatService.login(this.currentUser.id);
     this.chatService.sendMessage(true);
-    this.userList = this.userList.filter((user: any) => user.phone !== this.phone.toString());
-    console.log("mm", this.messageArray);
-    
+    this.userList = this.userList.filter((user: any) => user.phone !== this.phone.toString());    
     if (this.currentUser) {
       this.showScreen = true;
       dismiss();
     }
   }
 
+   /**
+   * @author: Gurnain
+   * Logs out of the application, hiding the chat screen, displaying login popup
+   **/
   logout(): void{
     this.chatService.logout(this.currentUser.id);
     this.showScreen = false;
@@ -115,22 +122,21 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.openPopup(this.popup);
   }
 
+   /**
+   * @author: Gurnain
+   * Accessed on clicking any user from side bar to chat with, opens a private chat by setting room id
+   *  room between current user and selected user
+   **/
   selectUserHandler(phone: string): void {
     this.showChat =true;
     this.selectedUser = this.userList.find((user: any) => user?.phone === phone);
     this.roomId = this.selectedUser.roomId[this.currentUser.id];
-    // this.messageArray = [];
-    // this.chatService.getMessage()
-    // .subscribe((data: { user: string, room: string, message: string }) => {
-    //   this.messageArray.push(data);
-    // });
-    this.join(this.currentUser.name, this.roomId);
   }
 
-  join(username: string, roomId: string): void {
-    this.chatService.joinRoom({user: username, room: roomId});
-  }
-
+   /**
+   * @author: Gurnain
+   * Sends object which contains message sent by current user to selected user
+   **/
   sendMessage(): void {
     this.chatService.sendMessage({
       user: this.currentUser.name,
